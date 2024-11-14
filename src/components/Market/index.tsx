@@ -32,6 +32,7 @@ const Market: React.FC<MarketProps> = ({ web3, account }) => {
   useEffect(() => {
     const init = async () => {
       try {
+        console.log(web3, markets.lmsrAddress, account);
         conditionalTokensRepo = await loadConditionalTokensRepo(web3, markets.lmsrAddress, account)
         marketMakersRepo = await loadMarketMakersRepo(web3, markets.lmsrAddress, account)
         await getMarketInfo()
@@ -102,6 +103,8 @@ const Market: React.FC<MarketProps> = ({ web3, account }) => {
 
   const buy = async () => {
     const collateral = await marketMakersRepo.getCollateralToken()
+
+    console.log(collateral)
     const formatedAmount = new BigNumber(selectedAmount).multipliedBy(
       new BigNumber(Math.pow(10, collateral.decimals)),
     )
@@ -115,13 +118,16 @@ const Market: React.FC<MarketProps> = ({ web3, account }) => {
     const cost = await marketMakersRepo.calcNetCost(outcomeTokenAmounts)
 
     const collateralBalance = await collateral.contract.balanceOf(account)
-    if (cost.gt(collateralBalance)) {
-      await collateral.contract.deposit({ value: formatedAmount.toString(), from: account })
+    console.log(collateralBalance.toString(), cost.toString())
+
+    // if (cost.gt(collateralBalance)) {
+    if (true) {
+      // await collateral.contract.deposit({ value: formatedAmount.toString(), from: account })
       await collateral.contract.approve(marketInfo.lmsrAddress, formatedAmount.toString(), {
         from: account,
       })
     }
-
+    
     const tx = await marketMakersRepo.trade(outcomeTokenAmounts, cost, account)
     console.log({ tx })
 

@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  local:
+    image: trufflesuite/ganache:latest
+    command: ['-d', '-i', '1337']
+    ports:
+      - '8545:8545'
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: development
+    depends_on:
+      - local
+    env_file:
+      - .env
+    command: /bin/sh -c "npm run migrate && npm start"

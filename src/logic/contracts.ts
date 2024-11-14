@@ -1,6 +1,7 @@
 import ConditionalTokens from '../abi/ConditionalTokens.json'
 import LMSRMarketMaker from '../abi/LMSRMarketMaker.json'
 import WETH9 from '../abi/WETH9.json'
+import UXD from '../abi/UXD.json'
 const TruffleContract = require('@truffle/contract')
 
 let contracts: Object | undefined
@@ -39,6 +40,14 @@ const loadWETH9Contract = async (web3: any) => {
   }
   return weth9Contract
 }
+const loadUXDContract = async (web3: any) => {
+  let uxdContract
+  if (!contracts) {
+    uxdContract = TruffleContract(UXD)
+    uxdContract.setProvider(web3.currentProvider)
+  }
+  return uxdContract
+}
 
 const loadContracts = async (web3: any, lmsrAddress: string, account: string) => {
   try {
@@ -54,16 +63,17 @@ const loadContracts = async (web3: any, lmsrAddress: string, account: string) =>
 
       const LMSRMarketMakerContract = await loadLMSRMarketMakerContract(web3)
       const ConditionalTokensContract = await loadConditionalTokensContract(web3)
-      const WETH9Contract = await loadWETH9Contract(web3)
+      // const WETH9Contract = await loadWETH9Contract(web3)
+      const UXDContract = await loadUXDContract(web3) 
 
       const lmsrMarketMaker = await LMSRMarketMakerContract.at(lmsrAddress)
       const conditionalTokens = await ConditionalTokensContract.at(await lmsrMarketMaker.pmSystem())
       const collateralToken = {
         address: await lmsrMarketMaker.collateralToken(),
-        contract: await WETH9Contract.at(await lmsrMarketMaker.collateralToken()),
-        name: 'Wrapped Ether',
+        contract: await UXDContract.at(await lmsrMarketMaker.collateralToken()),
+        name: 'Criptodolar UXD',
         decimals: 18,
-        symbol: 'WETH',
+        symbol: 'UXD',
       }
 
       contracts = { lmsrMarketMaker, conditionalTokens, collateralToken }
